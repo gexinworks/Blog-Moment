@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨与思 — Markdown 博客</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAF6F0;
+  --bg-card: #FFFDF8;
+  --ink: #1A1A1A;
+  --ink-light: #4A4A4A;
+  --ink-muted: #8A8580;
+  --accent: #C4553A;
+  --accent-hover: #A8402A;
+  --accent-soft: #C4553A18;
+  --border: #E8E0D6;
+  --border-dark: #D4CBC0;
+  --tag-bg: #F0EBE3;
+  --tag-active: #1A1A1A;
+  --code-bg: #2D2A26;
+  --shadow: 0 2px 20px rgba(26,26,26,0.06);
+  --shadow-hover: 0 8px 40px rgba(26,26,26,0.1);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Libre Baskerville', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(196,85,58,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(196,85,58,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* ---- HEADER ---- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  background: rgba(250,246,240,0.92);
+}
+
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.2rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-logo {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.site-logo span { color: var(--accent); }
+
+.site-logo:hover { color: var(--accent); }
+
+.header-nav {
+  display: flex;
+  gap: 1.8rem;
+  align-items: center;
+}
+
+.header-nav a {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.header-nav a:hover { color: var(--ink); }
+
+/* ---- HERO ---- */
+.hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 2rem 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 5.5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  max-width: 700px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink-muted);
+  margin-top: 1.2rem;
+  font-style: italic;
+  max-width: 500px;
+}
+
+.hero-line {
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  margin-top: 2rem;
+  border-radius: 2px;
+}
+
+/* ---- TAGS FILTER ---- */
+.filter-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.filter-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  margin-bottom: 0.8rem;
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border-dark);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.03em;
+  position: relative;
+  overflow: hidden;
+}
+
+.tag-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tag-active);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+  z-index: -1;
+  border-radius: 100px;
+}
+
+.tag-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.tag-btn.active {
+  background: var(--tag-active);
+  color: #fff;
+  border-color: var(--tag-active);
+}
+
+.tag-btn.active::before { transform: scaleX(1); }
+
+.tag-count {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  padding: 0 0.4rem;
+  border-radius: 8px;
+  margin-left: 0.3rem;
+  font-size: 0.65rem;
+}
+
+/* ---- POSTS GRID ---- */
+.posts-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
+}
+
+.post-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+  animation: cardIn 0.6s ease both;
+}
+
+.post-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.post-card:hover {
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+}
+
+.post-card:hover::after { opacity: 1; }
+
+.post-card.hidden {
+  display: none;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.post-meta .date { text-transform: uppercase; }
+
+.post-meta .reading-time {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.reading-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+
+.post-title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.7rem;
+  transition: color var(--transition);
+}
+
+.post-card:hover .post-title { color: var(--accent); }
+
+.post-excerpt {
+  font-size: 0.92rem;
+  color: var(--ink-light);
+  line-height: 1.65;
+  margin-bottom: 1.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.post-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.25rem 0.65rem;
+  background: var(--tag-bg);
+  border-radius: 100px;
+  color: var(--ink-muted);
+  letter-spacing: 0.03em;
+}
+
+/* ---- ARTICLE DETAIL (FULL PAGE) ---- */
+.article-overlay {
+  display: none;
+}
+
+.article-page {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-card);
+  z-index: 201;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.article-page.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.article-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: rgba(255,253,248,0.95);
+  backdrop-filter: blur(12px);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.04em;
+}
+
+.back-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.back-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.article-topbar .read-time-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.article-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 5rem;
+}
+
+.article-body .article-meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.article-body h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+
+.article-body .article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---- MARKDOWN RENDERED STYLES ---- */
+.markdown-body h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; margin: 2.5rem 0 1rem; letter-spacing: -0.02em; }
+.markdown-body h2 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; margin: 2.2rem 0 0.8rem; letter-spacing: -0.01em; color: var(--ink); }
+.markdown-body h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin: 1.8rem 0 0.7rem; }
+.markdown-body p { margin-bottom: 1.3rem; font-size: 1rem; line-height: 1.8; color: var(--ink-light); }
+.markdown-body strong { color: var(--ink); font-weight: 700; }
+.markdown-body em { font-style: italic; }
+.markdown-body a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; transition: color var(--transition); }
+.markdown-body a:hover { color: var(--accent-hover); }
+
+.markdown-body ul, .markdown-body ol {
+  margin: 0 0 1.3rem 1.5rem;
+  color: var(--ink-light);
+}
+
+.markdown-body li { margin-bottom: 0.4rem; line-height: 1.7; }
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1.8rem 0;
+  padding: 1rem 1.5rem;
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+.markdown-body blockquote p { color: var(--ink); margin-bottom: 0; }
+
+.markdown-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--tag-bg);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.markdown-body pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  position: relative;
+}
+
+.markdown-body pre code {
+  background: none;
+  color: #E8E0D6;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.markdown-body hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 2.5rem 0;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.markdown-body th, .markdown-body td {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.markdown-body th {
+  background: var(--tag-bg);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+/* ---- COMMENTS (GISCUS) ---- */
+.comments-section {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.comments-heading {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.giscus-frame {
+  border-radius: 10px;
+}
+
+.giscus, .giscus-frame {
+  width: 100%;
+}
+
+/* ---- NO RESULTS ---- */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  display: none;
+}
+
+.no-results.show { display: block; }
+
+.no-results h3 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.5rem;
+}
+
+.no-results p {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+/* ---- FOOTER ---- */
+.site-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 640px) {
+  .header-inner { padding: 1rem 1.2rem; }
+  .hero { padding: 3rem 1.2rem 2rem; }
+  .filter-section, .posts-section { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .posts-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .post-card { padding: 1.5rem; }
+  .article-body { padding: 2rem 1.2rem 3rem; }
+  .header-nav { gap: 1rem; }
+  .site-footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  .moments-section { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .moment-card { padding: 1.5rem; }
+  .guide-section { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .guide-content { padding: 0; }
+}
+
+/* ---- VIEW MANAGEMENT ---- */
+.view-hidden { display: none !important; }
+
+/* ---- NAV ACTIVE STATE ---- */
+.header-nav a.nav-active {
+  color: var(--ink);
+  position: relative;
+}
+.header-nav a.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* ---- MOMENTS ---- */
+.moments-section {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.moments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.moments-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.moments-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.moments-timeline {
+  position: relative;
+}
+
+.moments-timeline::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--border), var(--border-dark), var(--border));
+  border-radius: 1px;
+}
+
+.moment-card {
+  position: relative;
+  margin-left: 50px;
+  margin-bottom: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 1.8rem;
+  transition: all var(--transition);
+  animation: cardIn 0.5s ease both;
+}
+
+.moment-card::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  top: 22px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  z-index: 1;
+}
+
+.moment-card:hover {
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow);
+}
+
+.moment-date {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.moment-mood {
+  font-size: 0.85rem;
+}
+
+.moment-text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--ink-light);
+}
+
+.moment-text p { margin-bottom: 0.6rem; }
+.moment-text p:last-child { margin-bottom: 0; }
+.moment-text strong { color: var(--ink); font-weight: 700; }
+.moment-text em { font-style: italic; }
+.moment-text code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--tag-bg);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.moment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+}
+
+.moment-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--accent-soft);
+  border-radius: 100px;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+
+.moment-image {
+  margin-top: 0.8rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--tag-bg);
+  padding: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  text-align: center;
+  border: 1px dashed var(--border-dark);
+}
+
+/* ---- GUIDE ---- */
+.guide-section {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.guide-content {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.guide-content h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 2.5rem 0 1rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.guide-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.8rem 0 0.7rem;
+}
+
+.guide-content p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--ink-light);
+  margin-bottom: 1.2rem;
+}
+
+.guide-content ul, .guide-content ol {
+  margin: 0 0 1.2rem 1.5rem;
+  color: var(--ink-light);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.guide-content li { margin-bottom: 0.35rem; }
+
+.guide-content code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--tag-bg);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.guide-content pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.3rem;
+  margin: 1.2rem 0;
+  overflow-x: auto;
+}
+
+.guide-content pre code {
+  background: none;
+  color: #E8E0D6;
+  padding: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.guide-content blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.3rem;
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+.guide-content blockquote p { color: var(--ink); margin-bottom: 0; }
+
+.guide-step {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.15rem;
+}
+
+.step-content h3 {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+}
+
+.step-content p { margin-bottom: 0.6rem; }
+
+.file-tree {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.3rem 1.5rem;
+  margin: 1.2rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.9;
+  color: #E8E0D6;
+}
+
+.file-tree .dir { color: #C4553A; }
+.file-tree .file { color: #aaa; }
+
+/* ---- PAGINATION ---- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 2.5rem;
+  padding: 1rem 0;
+}
+
+.page-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.page-info {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  min-width: 80px;
+  text-align: center;
+}
+
+.page-dots {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.page-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-dark);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  padding: 0;
+}
+
+.page-dot:hover {
+  border-color: var(--ink);
+}
+
+.page-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- HIDE PLATFORM BRANDING ---- */
+[data-mule-badge], .mule-badge, .mule-watermark,
+div[style*="mulerun"], a[href*="mulerun"],
+div[class*="mule-"], iframe[src*="mulerun"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" onclick="goHome()">墨 <span>&</span> 思</a>
+      <nav class="header-nav">
+        <a href="#" class="nav-active" data-view="journal" onclick="switchView('journal')">文章</a>
+        <a href="#" data-view="moments" onclick="switchView('moments')">想法</a>
+        <a href="#" data-view="guide" onclick="switchView('guide')">指南</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="hero">
+    <h1>文字、代码 <em>与思考</em></h1>
+    <p class="hero-sub">关于技术、设计与构建之道的思考合集。</p>
+    <div class="hero-line"></div>
+  </section>
+
+  <section class="filter-section" id="filters">
+    <div class="filter-label">按主题筛选</div>
+    <div class="tags-row" id="tagsRow"></div>
+  </section>
+
+  <section class="posts-section">
+    <div class="posts-grid" id="postsGrid"></div>
+    <div class="no-results" id="noResults">
+      <h3>暂无匹配文章</h3>
+      <p>试试选择其他标签。</p>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <!-- MOMENTS VIEW -->
+  <section class="hero view-hidden" id="heroMoments">
+    <h1>灵感 <em>碎片</em></h1>
+    <p class="hero-sub">随手记录的想法、发现与日常灵感，像朋友圈一样轻松。</p>
+    <div class="hero-line"></div>
+  </section>
+  <section class="moments-section view-hidden" id="momentsSection">
+    <div class="moments-header">
+      <h2>时间线</h2>
+      <span class="moments-count" id="momentsCount"></span>
+    </div>
+    <div class="moments-timeline" id="momentsTimeline"></div>
+  </section>
+
+  <!-- GUIDE VIEW -->
+  <section class="hero view-hidden" id="heroGuide">
+    <h1>使用 <em>指南</em></h1>
+    <p class="hero-sub">关于博客写作、发布和管理的完整说明。</p>
+    <div class="hero-line"></div>
+  </section>
+  <section class="guide-section view-hidden" id="guideSection">
+    <div class="guide-content" id="guideContent"></div>
+  </section>
+
+  <div class="article-page" id="articlePage">
+    <div class="article-topbar">
+      <button class="back-btn" onclick="closeArticle()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回列表
+      </button>
+      <span class="read-time-label" id="pageReadTime"></span>
+    </div>
+    <div class="article-body" id="articleBody"></div>
+  </div>
+
+  <footer class="site-footer">
+    <span>© 2026 墨与思</span>
+    <span>以 Markdown 书写</span>
+  </footer>
+<script>
+// ---- DATA STORE ----
+let posts = [];
+let moments = [];
+let currentPage = 1;
+let pageSize = 6;
+
+// ---- FRONTMATTER PARSER ----
+function parseFrontmatter(text) {
+  const match = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!match) return { meta: {}, content: text };
+  const meta = {};
+  match[1].split('\n').forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx === -1) return;
+    const key = line.slice(0, idx).trim();
+    let val = line.slice(idx + 1).trim();
+    if (val.startsWith('[') && val.endsWith(']')) {
+      val = val.slice(1, -1).split(',').map(s => s.trim());
+    }
+    meta[key] = val;
+  });
+  return { meta, content: match[2] };
+}
+
+// ---- PARSE MOMENTS FILE ----
+function parseMomentsFile(text) {
+  const blocks = text.split(/\n?---\n/).filter(s => s.trim());
+  const result = [];
+  let id = 1;
+  for (let i = 0; i < blocks.length; i += 2) {
+    const metaBlock = blocks[i];
+    const contentBlock = (blocks[i + 1] || '').trim();
+    const meta = {};
+    metaBlock.split('\n').forEach(line => {
+      const idx = line.indexOf(':');
+      if (idx === -1) return;
+      const key = line.slice(0, idx).trim();
+      let val = line.slice(idx + 1).trim();
+      if (key === 'tags' && val.startsWith('[') && val.endsWith(']')) {
+        val = val.slice(1, -1).split(',').map(s => s.trim());
+      }
+      meta[key] = val;
+    });
+    if (meta.date) {
+      result.push({ id: id++, date: meta.date, mood: meta.mood || '', content: contentBlock, tags: meta.tags || [] });
+    }
+  }
+  return result;
+}
+
+// ---- LOAD ALL DATA UPFRONT ----
+async function loadPosts() {
+  try {
+    const resp = await fetch('posts/index.json');
+    const index = await resp.json();
+    // Fetch all markdown files in parallel
+    const fetches = index.map(item => fetch(`posts/${item.slug}.md`).then(r => r.text()));
+    const contents = await Promise.all(fetches);
+    posts = index.map((item, i) => {
+      const { content } = parseFrontmatter(contents[i]);
+      return {
+        id: i + 1,
+        slug: item.slug,
+        title: item.title,
+        date: item.date,
+        tags: item.tags,
+        content: content
+      };
+    });
+  } catch (e) {
+    console.error('Failed to load posts:', e);
+    posts = [];
+  }
+}
+
+async function loadMoments() {
+  try {
+    const resp = await fetch('moments.md');
+    const text = await resp.text();
+    moments = parseMomentsFile(text);
+  } catch (e) {
+    console.error('Failed to load moments:', e);
+    moments = [];
+  }
+}
+
+// ---- UTILITIES ----
+function estimateReadingTime(markdown) {
+  const text = markdown.replace(/[#*`\[\]()>|_~-]/g, '').replace(/\n/g, ' ');
+  const words = text.trim().split(/\s+/).length;
+  return Math.ceil(words / 220);
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function getExcerpt(markdown) {
+  const lines = markdown.trim().split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('`') && !l.startsWith('>') && !l.startsWith('|') && !l.startsWith('-'));
+  const text = lines.slice(0, 3).join(' ').replace(/[*_`\[\]()]/g, '');
+  return text.substring(0, 160) + (text.length > 160 ? '...' : '');
+}
+
+// ---- DYNAMIC PAGE SIZE ----
+function calcPageSize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  // Estimate card height ~220px, available height ~(vh - 380px for header/hero/filters/pagination)
+  const availH = h - 380;
+  const rows = Math.max(1, Math.floor(availH / 240));
+  // Columns based on grid: minmax(320px, 1fr)
+  const gridW = Math.min(w, 1100) - 64; // padding
+  const cols = Math.max(1, Math.floor(gridW / 340));
+  return Math.max(3, rows * cols);
+}
+
+// ---- GATHER ALL TAGS ----
+function getAllTags() {
+  const tagMap = {};
+  posts.forEach(p => {
+    p.tags.forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; });
+  });
+  return Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
+}
+
+// ---- RENDER TAGS ----
+let activeTag = null;
+
+function renderTags() {
+  const tagsRow = document.getElementById('tagsRow');
+  const allTags = getAllTags();
+  let html = `<button class="tag-btn ${!activeTag ? 'active' : ''}" onclick="filterByTag(null)">全部</button>`;
+  allTags.forEach(([tag, count]) => {
+    html += `<button class="tag-btn ${activeTag === tag ? 'active' : ''}" onclick="filterByTag('${tag}')">${tag}<span class="tag-count">${count}</span></button>`;
+  });
+  tagsRow.innerHTML = html;
+}
+
+function filterByTag(tag) {
+  activeTag = tag;
+  currentPage = 1;
+  renderTags();
+  renderPosts();
+}
+
+// ---- RENDER POSTS WITH PAGINATION ----
+function renderPosts() {
+  const grid = document.getElementById('postsGrid');
+  const noResults = document.getElementById('noResults');
+  const paginationEl = document.getElementById('pagination');
+  const filtered = activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    paginationEl.innerHTML = '';
+    noResults.classList.add('show');
+    return;
+  }
+  noResults.classList.remove('show');
+
+  pageSize = calcPageSize();
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * pageSize;
+  const pageItems = filtered.slice(start, start + pageSize);
+
+  grid.innerHTML = pageItems.map((post, i) => {
+    const readTime = estimateReadingTime(post.content);
+    const excerpt = getExcerpt(post.content);
+    return `
+      <article class="post-card" onclick="openArticle(${post.id})" style="animation-delay:${i * 0.08}s">
+        <div class="post-meta">
+          <span class="date">${formatDate(post.date)}</span>
+          <span class="reading-dot"></span>
+          <span class="reading-time">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${readTime} 分钟
+          </span>
+        </div>
+        <h2 class="post-title">${post.title}</h2>
+        ${excerpt ? `<p class="post-excerpt">${excerpt}</p>` : ''}
+        <div class="post-tags">
+          ${post.tags.map(t => `<span class="post-tag">${t}</span>`).join('')}
+        </div>
+      </article>`;
+  }).join('');
+
+  // Render pagination
+  if (totalPages <= 1) {
+    paginationEl.innerHTML = '';
+    return;
+  }
+
+  let dots = '';
+  for (let p = 1; p <= totalPages; p++) {
+    dots += `<button class="page-dot ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})" title="第 ${p} 页"></button>`;
+  }
+
+  paginationEl.innerHTML = `
+    <button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      上一页
+    </button>
+    <div class="page-dots">${dots}</div>
+    <span class="page-info">${currentPage} / ${totalPages}</span>
+    <button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+      下一页
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  `;
+}
+
+function goToPage(page) {
+  const filtered = activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts;
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderPosts();
+  // Scroll to top of posts
+  document.getElementById('filters').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ---- ARTICLE DETAIL ----
+function openArticle(id) {
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+
+  const readTime = estimateReadingTime(post.content);
+
+  document.getElementById('pageReadTime').textContent = `${readTime} 分钟阅读`;
+  document.getElementById('articleBody').innerHTML = `
+    <div class="article-meta">
+      <span>${formatDate(post.date)}</span>
+      <span style="color:var(--border-dark)">·</span>
+      <span>${readTime} 分钟阅读</span>
+    </div>
+    <h1>${post.title}</h1>
+    <div class="article-tags">
+      ${post.tags.map(t => `<span class="post-tag">${t}</span>`).join('')}
+    </div>
+    <div class="markdown-body">${marked.parse(post.content)}</div>
+    <div class="comments-section">
+      <h2 class="comments-heading">评论</h2>
+      <div id="giscus-container"></div>
+    </div>
+  `;
+
+  loadGiscus(post.slug, post.title);
+  document.getElementById('articlePage').classList.add('open');
+  document.getElementById('articlePage').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticle() {
+  const container = document.getElementById('giscus-container');
+  if (container) container.innerHTML = '';
+  document.getElementById('articlePage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeArticle();
+});
+
+// ---- GISCUS COMMENTS ----
+function loadGiscus(postSlug, postTitle) {
+  const container = document.getElementById('giscus-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const script = document.createElement('script');
+  script.src = 'https://giscus.app/client.js';
+  script.setAttribute('data-repo', 'YOUR_USERNAME/YOUR_REPO');
+  script.setAttribute('data-repo-id', 'YOUR_REPO_ID');
+  script.setAttribute('data-category', 'Announcements');
+  script.setAttribute('data-category-id', 'YOUR_CATEGORY_ID');
+  script.setAttribute('data-mapping', 'specific');
+  script.setAttribute('data-term', `post-${postSlug}`);
+  script.setAttribute('data-strict', '0');
+  script.setAttribute('data-reactions-enabled', '1');
+  script.setAttribute('data-emit-metadata', '0');
+  script.setAttribute('data-input-position', 'top');
+  script.setAttribute('data-theme', 'light_protanopia');
+  script.setAttribute('data-lang', 'zh-CN');
+  script.setAttribute('data-loading', 'lazy');
+  script.crossOrigin = 'anonymous';
+  script.async = true;
+  container.appendChild(script);
+}
+
+// ---- RENDER MOMENTS ----
+function renderMoments() {
+  const timeline = document.getElementById('momentsTimeline');
+  const countEl = document.getElementById('momentsCount');
+  countEl.textContent = `共 ${moments.length} 条想法`;
+
+  timeline.innerHTML = moments.map((m, i) => {
+    const d = new Date(m.date);
+    const dateStr = d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+    const timeStr = d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    const html = marked.parse(m.content);
+    return `
+      <div class="moment-card" style="animation-delay:${i * 0.06}s">
+        <div class="moment-date">
+          <span class="moment-mood">${m.mood}</span>
+          <span>${dateStr} ${timeStr}</span>
+        </div>
+        <div class="moment-text">${html}</div>
+        ${m.tags && m.tags.length ? `<div class="moment-tags">${m.tags.map(t => `<span class="moment-tag">#${t}</span>`).join('')}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ---- GUIDE CONTENT ----
+function renderGuide() {
+  const guideContent = document.getElementById('guideContent');
+  const guideMarkdown = `
+## 快速开始
+
+这个博客将内容与展示分离 —— 文章以独立的 **Markdown 文件**存储，通过 \`posts/index.json\` 索引管理。
+
+### 仓库结构
+
+\`\`\`
+your-blog/
+├── index.html              # 博客主页（样式 + 脚本）
+├── moments.md              # 想法/动态（所有条目在一个文件中）
+└── posts/
+    ├── index.json           # 文章索引（标题、日期、标签、文件名）
+    ├── my-first-post.md     # 文章 Markdown 文件
+    ├── another-post.md
+    └── ...
+\`\`\`
+
+## 如何发布文章
+
+### 第一步：创建 Markdown 文件
+
+在 \`posts/\` 目录下创建 \`.md\` 文件，文件名即为 slug（如 \`my-new-post.md\`）。
+
+文件格式使用 YAML frontmatter：
+
+\`\`\`markdown
+---
+title: 我的新文章
+date: 2026-04-20
+tags: [标签1, 标签2]
+---
+
+正文内容写在这里，支持完整的 **Markdown** 语法。
+
+## 支持子标题
+
+- 列表、代码块、表格、图片等都可以使用
+\`\`\`
+
+### 第二步：更新索引
+
+在 \`posts/index.json\` 数组 **开头** 添加新条目：
+
+\`\`\`json
+{
+  "slug": "my-new-post",
+  "title": "我的新文章",
+  "date": "2026-04-20",
+  "tags": ["标签1", "标签2"]
+}
+\`\`\`
+
+### 第三步：提交并推送
+
+\`\`\`bash
+git add posts/my-new-post.md posts/index.json
+git commit -m "新文章：我的新文章"
+git push
+\`\`\`
+
+GitHub Pages 会自动部署更新。
+
+---
+
+## 如何发布想法
+
+「想法」是短内容 —— 像开发者的朋友圈/微博。所有想法存在一个 \`moments.md\` 文件中。
+
+在文件 **开头** 添加新条目（最新的在最前）：
+
+\`\`\`markdown
+---
+date: 2026-04-20 14:30
+mood: 💡
+tags: [标签1, 标签2]
+---
+你的想法，支持 **Markdown** 格式。
+\`\`\`
+
+每条想法之间用 \`---\` 分隔的 frontmatter 块区分。
+
+> **提示**：想法支持完整的 Markdown —— 加粗、斜体、代码、链接等都可以。建议保持简洁，280 字以内为佳。
+
+---
+
+## 部署到 GitHub Pages
+
+### 初始设置
+
+1. 创建一个新的 GitHub 仓库（例如 \`my-blog\`）
+2. 将所有文件推送到 \`main\` 分支
+3. 进入 **Settings → Pages**
+4. Source 选择 **"Deploy from a branch"**
+5. 选择 **main** 分支，根目录（\`/\`）
+6. 点击 Save —— 博客将在 \`https://用户名.github.io/my-blog/\` 上线
+
+### 自定义域名（可选）
+
+1. 在 **Settings → Pages → Custom domain** 中输入你的域名
+2. 添加 \`CNAME\` DNS 记录指向 \`用户名.github.io\`
+3. 等待 DNS 生效并启用 HTTPS
+
+---
+
+## 设置 Giscus 评论
+
+Giscus 使用 GitHub Discussions 作为评论后端 —— 免费、无广告、无追踪。
+
+### 配置步骤
+
+1. **启用 Discussions**：仓库 Settings → Features → ✓ Discussions
+2. **安装 Giscus 应用**：访问 [giscus.app](https://giscus.app) 并授权你的仓库
+3. **获取配置**：在 giscus.app 输入仓库名，选择 Discussion 分类（如 "Announcements"）
+4. **更新代码**：在 \`index.html\` 的 \`loadGiscus()\` 函数中替换以下值：
+
+\`\`\`javascript
+script.setAttribute('data-repo', 'yourname/your-blog');
+script.setAttribute('data-repo-id', 'R_xxxxxxxxxx');
+script.setAttribute('data-category', 'Announcements');
+script.setAttribute('data-category-id', 'DIC_xxxxxxxxxx');
+\`\`\`
+
+---
+
+## 自定义主题
+
+### 修改配色
+
+编辑 \`index.html\` 中 \`:root\` 的 CSS 变量：
+
+\`\`\`css
+:root {
+  --bg: #FAF6F0;        /* 页面背景 */
+  --accent: #C4553A;    /* 强调色 */
+  --ink: #1A1A1A;       /* 文字颜色 */
+}
+\`\`\`
+
+### 标签
+
+标签从 \`posts/index.json\` 的 \`tags\` 字段自动聚合生成，无需额外配置。
+`;
+
+  guideContent.innerHTML = `<div class="markdown-body">${marked.parse(guideMarkdown)}</div>`;
+}
+
+// ---- VIEW SWITCHING ----
+let currentView = 'journal';
+
+function switchView(view) {
+  currentView = view;
+  closeArticle();
+
+  document.querySelectorAll('.header-nav a').forEach(a => {
+    a.classList.toggle('nav-active', a.dataset.view === view);
+  });
+
+  const journalEls = [document.getElementById('hero'), document.getElementById('filters'), document.querySelector('.posts-section')];
+  const momentsEls = [document.getElementById('heroMoments'), document.getElementById('momentsSection')];
+  const guideEls = [document.getElementById('heroGuide'), document.getElementById('guideSection')];
+
+  const allEls = [...journalEls, ...momentsEls, ...guideEls];
+  allEls.forEach(el => { if (el) el.classList.add('view-hidden'); });
+
+  let activeEls;
+  if (view === 'journal') activeEls = journalEls;
+  else if (view === 'moments') activeEls = momentsEls;
+  else if (view === 'guide') activeEls = guideEls;
+
+  activeEls.forEach(el => { if (el) el.classList.remove('view-hidden'); });
+
+  if (view === 'moments') renderMoments();
+  if (view === 'guide') renderGuide();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  closeArticle();
+  switchView('journal');
+  activeTag = null;
+  renderTags();
+  renderPosts();
+}
+
+// ---- INIT ----
+async function init() {
+  await Promise.all([loadPosts(), loadMoments()]);
+  renderTags();
+  renderPosts();
+}
+
+init();
+</script>
+</body>
+</html>
