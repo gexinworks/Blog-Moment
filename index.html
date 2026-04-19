@@ -991,11 +991,7 @@ div[class*="mule-"], iframe[src*="mulerun"] {
   <header class="site-header">
     <div class="header-inner">
       <a class="site-logo" onclick="goHome()">墨 <span>&</span> 思</a>
-      <nav class="header-nav">
-        <a href="#" class="nav-active" data-view="journal" onclick="switchView('journal')">文章</a>
-        <a href="#" data-view="moments" onclick="switchView('moments')">想法</a>
-        <a href="#" data-view="guide" onclick="switchView('guide')">指南</a>
-      </nav>
+      <nav class="header-nav" id="mainNav"></nav>
     </div>
   </header>
 
@@ -1059,11 +1055,21 @@ div[class*="mule-"], iframe[src*="mulerun"] {
     <span>以 Markdown 书写</span>
   </footer>
 <script>
+// ---- CATEGORY CONFIG ----
+const categories = [
+  { key: 'journal', label: '文章', dir: 'posts', heroTitle: '文字、代码 <em>与思考</em>', heroSub: '关于技术、设计与构建之道的思考合集。' },
+  { key: 'management', label: '管理', dir: 'management', heroTitle: '团队 <em>与管理</em>', heroSub: '关于团队管理、领导力与组织效能的思考。' },
+  { key: 'ops', label: '运维', dir: 'ops', heroTitle: '运维 <em>实践</em>', heroSub: '关于基础设施、部署与系统运维的经验。' },
+  { key: 'ai', label: '人工智能', dir: 'ai', heroTitle: '人工 <em>智能</em>', heroSub: '关于 AI、机器学习与智能应用的探索。' },
+];
+
 // ---- DATA STORE ----
-let posts = [];
+const categoryData = {}; // key -> posts[]
 let moments = [];
+let currentCategory = 'journal';
 let currentPage = 1;
 let pageSize = 6;
+let activeTag = null;
 
 // ---- FRONTMATTER PARSER ----
 function parseFrontmatter(text) {
@@ -1109,34 +1115,37 @@ function parseMomentsFile(text) {
   return result;
 }
 
-// ---- LOAD ALL DATA UPFRONT ----
-async function loadPosts() {
+// ---- LOAD CATEGORY DATA ----
+async function loadCategory(cat) {
   try {
-    const resp = await fetch('posts/index.json');
+    const resp = await fetch(`${cat.dir}/index.json`);
+    if (!resp.ok) { categoryData[cat.key] = []; return; }
     const index = await resp.json();
-    // Fetch all markdown files in parallel
-    const fetches = index.map(item => fetch(`posts/${item.slug}.md`).then(r => r.text()));
+    const fetches = index.map(item => fetch(`${cat.dir}/${item.slug}.md`).then(r => r.ok ? r.text() : ''));
     const contents = await Promise.all(fetches);
-    posts = index.map((item, i) => {
+    categoryData[cat.key] = index.map((item, i) => {
       const { content } = parseFrontmatter(contents[i]);
       return {
-        id: i + 1,
+        id: `${cat.key}-${i + 1}`,
         slug: item.slug,
         title: item.title,
         date: item.date,
         tags: item.tags,
-        content: content
+        content: content,
+        category: cat.key,
+        dir: cat.dir
       };
     });
   } catch (e) {
-    console.error('Failed to load posts:', e);
-    posts = [];
+    console.error(`Failed to load ${cat.key}:`, e);
+    categoryData[cat.key] = [];
   }
 }
 
 async function loadMoments() {
   try {
     const resp = await fetch('moments.md');
+    if (!resp.ok) { moments = []; return; }
     const text = await resp.text();
     moments = parseMomentsFile(text);
   } catch (e) {
@@ -1167,27 +1176,40 @@ function getExcerpt(markdown) {
 function calcPageSize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  // Estimate card height ~220px, available height ~(vh - 380px for header/hero/filters/pagination)
   const availH = h - 380;
   const rows = Math.max(1, Math.floor(availH / 240));
-  // Columns based on grid: minmax(320px, 1fr)
-  const gridW = Math.min(w, 1100) - 64; // padding
+  const gridW = Math.min(w, 1100) - 64;
   const cols = Math.max(1, Math.floor(gridW / 340));
   return Math.max(3, rows * cols);
+}
+
+// ---- CURRENT POSTS HELPER ----
+function currentPosts() {
+  return categoryData[currentCategory] || [];
 }
 
 // ---- GATHER ALL TAGS ----
 function getAllTags() {
   const tagMap = {};
-  posts.forEach(p => {
+  currentPosts().forEach(p => {
     p.tags.forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; });
   });
   return Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
 }
 
-// ---- RENDER TAGS ----
-let activeTag = null;
+// ---- RENDER NAV ----
+function renderNav() {
+  const nav = document.getElementById('mainNav');
+  let html = '';
+  categories.forEach(cat => {
+    html += `<a href="#" data-view="${cat.key}" class="${currentCategory === cat.key && !['moments','guide'].includes(currentCategory) ? 'nav-active' : ''}" onclick="switchView('${cat.key}')">${cat.label}</a>`;
+  });
+  html += `<a href="#" data-view="moments" class="${currentCategory === 'moments' ? 'nav-active' : ''}" onclick="switchView('moments')">想法</a>`;
+  html += `<a href="#" data-view="guide" class="${currentCategory === 'guide' ? 'nav-active' : ''}" onclick="switchView('guide')">指南</a>`;
+  nav.innerHTML = html;
+}
 
+// ---- RENDER TAGS ----
 function renderTags() {
   const tagsRow = document.getElementById('tagsRow');
   const allTags = getAllTags();
@@ -1210,6 +1232,7 @@ function renderPosts() {
   const grid = document.getElementById('postsGrid');
   const noResults = document.getElementById('noResults');
   const paginationEl = document.getElementById('pagination');
+  const posts = currentPosts();
   const filtered = activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts;
 
   if (filtered.length === 0) {
@@ -1230,7 +1253,7 @@ function renderPosts() {
     const readTime = estimateReadingTime(post.content);
     const excerpt = getExcerpt(post.content);
     return `
-      <article class="post-card" onclick="openArticle(${post.id})" style="animation-delay:${i * 0.08}s">
+      <article class="post-card" onclick="openArticle('${post.id}')" style="animation-delay:${i * 0.08}s">
         <div class="post-meta">
           <span class="date">${formatDate(post.date)}</span>
           <span class="reading-dot"></span>
@@ -1273,18 +1296,23 @@ function renderPosts() {
 }
 
 function goToPage(page) {
+  const posts = currentPosts();
   const filtered = activeTag ? posts.filter(p => p.tags.includes(activeTag)) : posts;
   const totalPages = Math.ceil(filtered.length / pageSize);
   if (page < 1 || page > totalPages) return;
   currentPage = page;
   renderPosts();
-  // Scroll to top of posts
   document.getElementById('filters').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ---- ARTICLE DETAIL ----
 function openArticle(id) {
-  const post = posts.find(p => p.id === id);
+  // Find post across all categories
+  let post = null;
+  for (const key in categoryData) {
+    post = categoryData[key].find(p => p.id === id);
+    if (post) break;
+  }
   if (!post) return;
 
   const readTime = estimateReadingTime(post.content);
@@ -1379,28 +1407,35 @@ function renderGuide() {
   const guideMarkdown = `
 ## 快速开始
 
-这个博客将内容与展示分离 —— 文章以独立的 **Markdown 文件**存储，通过 \`posts/index.json\` 索引管理。
+这个博客将内容与展示分离 —— 文章以独立的 **Markdown 文件**存储，通过各栏目目录下的 \`index.json\` 索引管理。
 
 ### 仓库结构
 
 \`\`\`
 your-blog/
 ├── index.html              # 博客主页（样式 + 脚本）
-├── moments.md              # 想法/动态（所有条目在一个文件中）
-└── posts/
-    ├── index.json           # 文章索引（标题、日期、标签、文件名）
-    ├── my-first-post.md     # 文章 Markdown 文件
-    ├── another-post.md
-    └── ...
+├── moments.md              # 想法/动态
+├── posts/                   # 「文章」栏目
+│   ├── index.json
+│   └── *.md
+├── management/              # 「管理」栏目
+│   ├── index.json
+│   └── *.md
+├── ops/                     # 「运维」栏目
+│   ├── index.json
+│   └── *.md
+└── ai/                      # 「人工智能」栏目
+    ├── index.json
+    └── *.md
 \`\`\`
 
 ## 如何发布文章
 
-### 第一步：创建 Markdown 文件
+### 第一步：选择栏目目录
 
-在 \`posts/\` 目录下创建 \`.md\` 文件，文件名即为 slug（如 \`my-new-post.md\`）。
+每个栏目对应一个独立目录。例如发布管理类文章，就在 \`management/\` 目录下操作。
 
-文件格式使用 YAML frontmatter：
+### 第二步：创建 Markdown 文件
 
 \`\`\`markdown
 ---
@@ -1410,15 +1445,11 @@ tags: [标签1, 标签2]
 ---
 
 正文内容写在这里，支持完整的 **Markdown** 语法。
-
-## 支持子标题
-
-- 列表、代码块、表格、图片等都可以使用
 \`\`\`
 
-### 第二步：更新索引
+### 第三步：更新索引
 
-在 \`posts/index.json\` 数组 **开头** 添加新条目：
+在对应栏目的 \`index.json\` 数组 **开头** 添加新条目：
 
 \`\`\`json
 {
@@ -1429,23 +1460,33 @@ tags: [标签1, 标签2]
 }
 \`\`\`
 
-### 第三步：提交并推送
+### 第四步：提交并推送
 
 \`\`\`bash
-git add posts/my-new-post.md posts/index.json
+git add management/my-new-post.md management/index.json
 git commit -m "新文章：我的新文章"
 git push
 \`\`\`
 
-GitHub Pages 会自动部署更新。
+---
+
+## 如何新增栏目
+
+在 \`index.html\` 的 \`categories\` 数组中添加一项：
+
+\`\`\`javascript
+{ key: 'newcat', label: '新栏目', dir: 'newcat',
+  heroTitle: '新栏目 <em>标题</em>',
+  heroSub: '栏目描述文字。' }
+\`\`\`
+
+然后创建对应目录和 \`index.json\` 文件即可，无需修改其他代码。
 
 ---
 
 ## 如何发布想法
 
-「想法」是短内容 —— 像开发者的朋友圈/微博。所有想法存在一个 \`moments.md\` 文件中。
-
-在文件 **开头** 添加新条目（最新的在最前）：
+在 \`moments.md\` 文件 **开头** 添加新条目：
 
 \`\`\`markdown
 ---
@@ -1456,22 +1497,17 @@ tags: [标签1, 标签2]
 你的想法，支持 **Markdown** 格式。
 \`\`\`
 
-每条想法之间用 \`---\` 分隔的 frontmatter 块区分。
-
 > **提示**：想法支持完整的 Markdown —— 加粗、斜体、代码、链接等都可以。建议保持简洁，280 字以内为佳。
 
 ---
 
 ## 部署到 GitHub Pages
 
-### 初始设置
-
-1. 创建一个新的 GitHub 仓库（例如 \`my-blog\`）
+1. 创建一个新的 GitHub 仓库
 2. 将所有文件推送到 \`main\` 分支
-3. 进入 **Settings → Pages**
-4. Source 选择 **"Deploy from a branch"**
-5. 选择 **main** 分支，根目录（\`/\`）
-6. 点击 Save —— 博客将在 \`https://用户名.github.io/my-blog/\` 上线
+3. 在仓库根目录创建 \`.nojekyll\` 空文件（避免 Jekyll 拦截 .md 文件）
+4. 进入 **Settings → Pages**，选择 main 分支部署
+5. 博客将在 \`https://用户名.github.io/仓库名/\` 上线
 
 ### 自定义域名（可选）
 
@@ -1483,27 +1519,13 @@ tags: [标签1, 标签2]
 
 ## 设置 Giscus 评论
 
-Giscus 使用 GitHub Discussions 作为评论后端 —— 免费、无广告、无追踪。
-
-### 配置步骤
-
-1. **启用 Discussions**：仓库 Settings → Features → ✓ Discussions
-2. **安装 Giscus 应用**：访问 [giscus.app](https://giscus.app) 并授权你的仓库
-3. **获取配置**：在 giscus.app 输入仓库名，选择 Discussion 分类（如 "Announcements"）
-4. **更新代码**：在 \`index.html\` 的 \`loadGiscus()\` 函数中替换以下值：
-
-\`\`\`javascript
-script.setAttribute('data-repo', 'yourname/your-blog');
-script.setAttribute('data-repo-id', 'R_xxxxxxxxxx');
-script.setAttribute('data-category', 'Announcements');
-script.setAttribute('data-category-id', 'DIC_xxxxxxxxxx');
-\`\`\`
+1. 仓库 Settings → Features → ✓ Discussions
+2. 访问 [giscus.app](https://giscus.app) 并授权你的仓库
+3. 在 \`index.html\` 的 \`loadGiscus()\` 函数中替换 repo、repo-id、category-id
 
 ---
 
 ## 自定义主题
-
-### 修改配色
 
 编辑 \`index.html\` 中 \`:root\` 的 CSS 变量：
 
@@ -1514,57 +1536,65 @@ script.setAttribute('data-category-id', 'DIC_xxxxxxxxxx');
   --ink: #1A1A1A;       /* 文字颜色 */
 }
 \`\`\`
-
-### 标签
-
-标签从 \`posts/index.json\` 的 \`tags\` 字段自动聚合生成，无需额外配置。
 `;
 
   guideContent.innerHTML = `<div class="markdown-body">${marked.parse(guideMarkdown)}</div>`;
 }
 
 // ---- VIEW SWITCHING ----
-let currentView = 'journal';
-
 function switchView(view) {
-  currentView = view;
   closeArticle();
 
-  document.querySelectorAll('.header-nav a').forEach(a => {
-    a.classList.toggle('nav-active', a.dataset.view === view);
-  });
+  const isCategory = categories.some(c => c.key === view);
+
+  if (isCategory) {
+    currentCategory = view;
+    activeTag = null;
+    currentPage = 1;
+
+    // Update hero
+    const cat = categories.find(c => c.key === view);
+    document.querySelector('#hero h1').innerHTML = cat.heroTitle;
+    document.querySelector('#hero .hero-sub').textContent = cat.heroSub;
+  }
+
+  // Update nav active state
+  renderNav();
 
   const journalEls = [document.getElementById('hero'), document.getElementById('filters'), document.querySelector('.posts-section')];
   const momentsEls = [document.getElementById('heroMoments'), document.getElementById('momentsSection')];
   const guideEls = [document.getElementById('heroGuide'), document.getElementById('guideSection')];
-
   const allEls = [...journalEls, ...momentsEls, ...guideEls];
   allEls.forEach(el => { if (el) el.classList.add('view-hidden'); });
 
   let activeEls;
-  if (view === 'journal') activeEls = journalEls;
-  else if (view === 'moments') activeEls = momentsEls;
-  else if (view === 'guide') activeEls = guideEls;
+  if (isCategory) {
+    activeEls = journalEls;
+    renderTags();
+    renderPosts();
+  } else if (view === 'moments') {
+    activeEls = momentsEls;
+    renderMoments();
+  } else if (view === 'guide') {
+    activeEls = guideEls;
+    renderGuide();
+  }
 
-  activeEls.forEach(el => { if (el) el.classList.remove('view-hidden'); });
-
-  if (view === 'moments') renderMoments();
-  if (view === 'guide') renderGuide();
-
+  if (activeEls) activeEls.forEach(el => { if (el) el.classList.remove('view-hidden'); });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function goHome() {
   closeArticle();
   switchView('journal');
-  activeTag = null;
-  renderTags();
-  renderPosts();
 }
 
 // ---- INIT ----
 async function init() {
-  await Promise.all([loadPosts(), loadMoments()]);
+  renderNav();
+  const loadAll = categories.map(cat => loadCategory(cat));
+  loadAll.push(loadMoments());
+  await Promise.all(loadAll);
   renderTags();
   renderPosts();
 }
