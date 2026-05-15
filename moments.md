@@ -1,4 +1,11 @@
 ---
+date: 2026-05-15 23:45
+mood: 💡
+tags: [Tools, Thoughts]
+---
+用 Hermes 配置好了博客仓库的管理，现在只要跟它对话就能帮我发 moment，真的太棒了。它理解我的意图很精确，以后发想法也更简单了。
+
+---
 date: 2026-05-07 21:58
 mood: 💭
 tags: [Thoughts]
