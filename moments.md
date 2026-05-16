@@ -1,4 +1,15 @@
 ---
+date: 2026-05-16 12:30
+mood: 💭
+tags: [Thoughts, Tools]
+---
+最近用 Hermes 特别多，模型用的 deepseek-v4，环境是 Win11 + WSL。写了一个 app，加上日常聊天，没几天磁盘就快满了。
+
+翻了一下才发现，吃空间的大头是 Python 的 venv——同一个包被重复装在各种地方，不知不觉堆了一大堆。Hermes 每次创建 skill 或者跑不同任务，都会单独起一个 venv 来管自己的依赖，用久了自然膨胀得厉害。
+
+看来得尽快换台大硬盘的电脑了……
+
+---
 date: 2026-05-16 00:25
 mood: 💭
 tags: [Thoughts, Work]
