@@ -1,4 +1,11 @@
 ---
+date: 2026-05-17 13:33
+mood: 💭
+tags: [Thoughts, Tools]
+---
+不知不觉，我已经妥妥变成一个 token 消耗大户了——日均 token 消耗超过 1000 万。换个角度想，这 1000 万 token 背后是省下的大量时间和心智负担。用 token 买认知杠杆，这笔账怎么算都不亏。
+
+---
 date: 2026-05-16 12:30
 mood: 💭
 tags: [Thoughts, Tools]
