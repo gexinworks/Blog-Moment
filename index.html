@@ -1556,6 +1556,8 @@ function switchView(view) {
     const cat = categories.find(c => c.key === view);
     document.querySelector('#hero h1').innerHTML = cat.heroTitle;
     document.querySelector('#hero .hero-sub').textContent = cat.heroSub;
+  } else if (view === 'moments' || view === 'guide') {
+    currentCategory = view;
   }
 
   // Update nav active state
