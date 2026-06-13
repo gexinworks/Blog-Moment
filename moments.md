@@ -1,4 +1,14 @@
 ---
+date: 2026-06-13 15:25
+mood: 💡
+tags: [Thoughts, Work, SaaS]
+---
+
+最近在支持公司的 Qoder 和 QoderWork 售前售后，这类工具的收费逻辑是订阅费 + credits 费。credit 有点像积分费，总感觉怪怪的。
+
+这类工具的终态，我觉得应该是两条路：要么像 POE 或 Manus 那样，纯积分费，用多少付多少；要么私有化部署，收软件授权费。订阅 + 积分的双重收费对用户心理门槛确实高了。
+
+---
 date: 2026-06-04 12:07
 mood: 💭
 tags: [Thoughts, Quotes]
