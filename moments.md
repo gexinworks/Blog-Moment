@@ -1,4 +1,16 @@
 ---
+date: 2026-06-28 14:20
+mood: ⚡
+tags: [Thoughts, AI]
+---
+
+![](assets/moments/2026-06-28-codex-deepseek-demo.jpg)
+
+用 Codex + DeepSeek 试着开发了几个 demo，感觉还不错，软件开发离下岗真是近在咫尺了。期待 AI 把设计、开发、测试、运维全都托管的那一天早点到来。
+
+预测一下：像淘宝、美团、支付宝、微信、抖音这些基础设施级 APP，话语权会越来越重；其他的 APP 大概都会变成个人定制版——每个人都有一个专属 AI 助手，按自己的需求生成专属应用。期待一下~
+
+---
 date: 2026-06-21 11:00
 mood: 💭
 tags: [Investing, Quotes]
