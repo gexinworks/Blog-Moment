@@ -1,4 +1,14 @@
 ---
+date: 2026-07-12 23:39
+mood: ⚡
+tags: [Thoughts, AI]
+---
+
+![](assets/moments/2026-07-12-ai-team.jpg)
+
+现在一句话就能拉起一个 AI 团队，让它直接开始开发应用。不知道效果怎么样，试试看吧——只能业余时间玩玩，下周再看看。
+
+---
 date: 2026-07-12 20:16
 mood: 💭
 tags: [Thoughts]
