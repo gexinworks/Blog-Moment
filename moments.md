@@ -1,4 +1,23 @@
 ---
+date: 2026-07-14 18:56
+mood: ⚡
+tags: [Thoughts, AI]
+---
+
+<table>
+  <tr>
+    <td><img src="assets/moments/2026-07-14-vibecoding-1.jpg" width="100%"></td>
+    <td><img src="assets/moments/2026-07-14-vibecoding-2.jpg" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/moments/2026-07-14-vibecoding-3.jpg" width="100%"></td>
+    <td><img src="assets/moments/2026-07-14-vibecoding-4.jpg" width="100%"></td>
+  </tr>
+</table>
+
+Vibe coding 实践了一下，还不错。一句话就写了个程序，功能试下来也都正常。就是 token 消耗有点多，花了 100 块左右。
+
+---
 date: 2026-07-12 23:39
 mood: ⚡
 tags: [Thoughts, AI]
