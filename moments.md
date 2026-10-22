@@ -1,4 +1,12 @@
 ---
+date: 2026-10-22 23:40
+mood: 📝
+tags: [Investing, Thoughts]
+---
+
+炒股赚钱，靠的是对消息收集的全面性 + 对消息判断的正确性。
+
+---
 date: 2026-10-14 21:11
 mood: 💭
 tags: [Thoughts]
