@@ -1,4 +1,14 @@
 ---
+date: 2026-10-24 13:35
+mood: ⚡
+tags: [Thoughts, Systems]
+---
+
+最近看到有人用这套技术栈搭私有云：Proxmox VE、Kubernetes（K8S）、containerd、Calico、kube-vip、MetalLB、HAProxy Ingress、Harbor、Helm、MySQL、Redis、RabbitMQ、TDengine、MinIO、Prometheus、Grafana、Loki、JumpServer、Synology NAS。
+
+看上去还可以啊。
+
+---
 date: 2026-10-22 23:40
 mood: 📝
 tags: [Investing, Thoughts]
