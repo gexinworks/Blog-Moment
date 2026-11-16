@@ -1,4 +1,14 @@
 ---
+date: 2026-11-17 00:18
+mood: ⚡
+tags: [Thoughts, AI]
+---
+
+![](assets/moments/2026-11-16-daobota.jpg)
+
+原来至少 5-6 个人、多个工种（流媒体 + 后端 + 前端）花费一年多才打磨好的导播台，现在给 AI 说几句话就搞定了。太 6 了。
+
+---
 date: 2026-10-25 11:45
 mood: 💭
 tags: [Thoughts]
